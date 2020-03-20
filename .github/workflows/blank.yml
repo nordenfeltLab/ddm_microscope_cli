@@ -22,7 +22,7 @@ jobs:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
       
-    - name: Run a multi-line script
+    - name: Install nim
       run: |
          $relurl = "https://api.github.com/repos/dom96/choosenim/releases/latest"
          $release = Invoke-RestMethod -Method 'Get' -Uri $relurl
@@ -30,4 +30,5 @@ jobs:
          $output = ".\choosenim.exe"
          (New-Object System.Net.WebClient).DownloadFile($winrel.browser_download_url, $output)
          .\choosenim.exe -y stable --firstInstall
-         C:\Users\runneradmin\.nimble\bin\nimble build
+    - name: Build
+      run: nimble build
