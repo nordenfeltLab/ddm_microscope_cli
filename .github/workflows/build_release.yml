@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    branches: [ master ]
+    tags:
+    - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+  pull_request:
+    branches: [ master ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: windows-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
+      
+    - name: Install nim
+      run: |
+         $relurl = "https://api.github.com/repos/dom96/choosenim/releases/latest"
+         $release = Invoke-RestMethod -Method 'Get' -Uri $relurl
+         $winrel = $release.assets | where name -LIKE "*_windows_amd64.exe"
+         $output = ".\choosenim.exe"
+         (New-Object System.Net.WebClient).DownloadFile($winrel.browser_download_url, $output)
+         .\choosenim.exe -y stable --firstInstall
+         echo "::add-path::C:\Users\runneradmin\.nimble\bin"
+    - name: Build
+      run: nimble -y build
+    - name: Dir
+      run: dir
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        asset_path: ./comp_serv
+        asset_name: comp_serv.exe
+        asset_content_type: application/vnd.microsoft.portable-executable
