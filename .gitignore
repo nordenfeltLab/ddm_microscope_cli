@@ -1,0 +1,5 @@
+.cache
+*.exe
+comp_srv
+test_parameters
+.DS_Store
