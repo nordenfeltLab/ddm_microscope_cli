@@ -29,5 +29,5 @@ jobs:
          $winrel = $release.assets | where name -LIKE "*_windows_amd64.exe"
          $output = ".\choosenim.exe"
          (New-Object System.Net.WebClient).DownloadFile($winrel.browser_download_url, $output)
-         .\choosenim.exe -y --firstInstall stable
+         .\choosenim.exe -y stable --firstInstall
          nimble build
