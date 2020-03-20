@@ -31,4 +31,6 @@ jobs:
          (New-Object System.Net.WebClient).DownloadFile($winrel.browser_download_url, $output)
          .\choosenim.exe -y stable --firstInstall
     - name: Build
-      run: nimble build
+      run: |
+        echo $Env:PATH
+        nimble build
