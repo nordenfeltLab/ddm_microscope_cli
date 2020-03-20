@@ -30,4 +30,4 @@ jobs:
          $output = ".\choosenim.exe"
          (New-Object System.Net.WebClient).DownloadFile($winrel.browser_download_url, $output)
          .\choosenim.exe -y stable --firstInstall
-         nimble build
+         C:\Users\runneradmin\.nimble\bin\nimble build
