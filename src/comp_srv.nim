@@ -1,5 +1,6 @@
 import strutils, tables, sequtils, strformat
 import httpClient, streams, os
+import logging
 import json
 import yaml/serialization, cligen
 
@@ -55,18 +56,18 @@ type
     system_parameters : SysParameters
 
 proc load_experiment(yaml_path : string) : Experiment =
-  var s = openFileStream(yaml_path)
-  defer: close(s)
-  load(s, result)
+    var s = openFileStream(yaml_path)
+    defer: close(s)
+    load(s, result)
 
 proc load_channels(channels_path : string, experiment : Experiment) : seq[IndexedChannel] =
-  var count = 0
-  for line in lines(channels_path):
-    inc(count)
-    for c in experiment.channels:
-      if contains(c.name, line):
-        let ic = IndexedChannel(name: c.name, staining:c.staining, definition:c.definition, fluorophore:c.fluorophore, index:count)
-        result.add(ic)
+    var count = 0
+    for line in lines(channels_path):
+      inc(count)
+      for c in experiment.channels:
+        if contains(c.name, line):
+          let ic = IndexedChannel(name: c.name, staining:c.staining, definition:c.definition, fluorophore:c.fluorophore, index:count)
+          result.add(ic)
 
 
 proc load_stage_pos(stage_path : string) : (float, float) =
@@ -84,6 +85,7 @@ proc load_stage_pos(stage_path : string) : (float, float) =
     let tmpData = to(parseJson(txt), StagePos)
     return (tmpData.x, tmpData.y)
 
+
 proc write_positions(output_path : string, pos_x : openArray[JsonNode], pos_y : openArray[JsonNode]) =
     let f = open(output_path, fmWrite)
     defer: close(f)
@@ -93,50 +95,80 @@ proc write_positions(output_path : string, pos_x : openArray[JsonNode], pos_y : 
             f.writeLine(line)
 
 proc write_sync_status(sync_path : string, status : string) = 
-      writefile(sync_path, status)
+    writefile(sync_path, status)
+
+proc init_logger(logging_path : string) = 
+    const logging_format = "[$datetime] - $levelname: "
+    try:
+      var logger = newFileLogger(logging_path, fmtStr = logging_format)
+      addHandler(logger)
+      info("Initialized logger...")
+
+    except IOError:
+      var logger = newFileLogger(fmtStr = logging_format)
+      addHandler(logger)
+      error(getCurrentExceptionMsg()) 
 
 proc tst(address = "http://localhost:4443", img_path = "color.tif",
          yaml_path = "experiment_params.yml", channels_path = "channels.txt",
          stage_path = "stage_pos.txt", exp_id_path = "exp_id.txt",
-         output_path = "output_file.txt", sync_path = "sync.txt", root_dir = getCurrentDir()) : int =
+         output_path = "output_file.txt", sync_path = "sync.txt",
+         logging_path = "log.txt", root_dir = getCurrentDir()) : int =
+  
+    init_logger(root_dir / logging_path)
+    try:
+      let
+        experiment = loadExperiment(root_dir / yaml_path)
+        
+        #info("Loaded experiment parameters.")
+        channels = load_channels(root_dir / channels_path, experiment)
+        #info("Loaded channels.")
+        (stage_pos_x, stage_pos_y) = load_stage_pos(root_dir / stage_path)
+        #info("Loaded stage positions.")
+        exp_id = parseInt(readFile(root_dir / exp_id_path))
+        #info("Loaded experiment id.")
+        e = experiment.experiment_parameters
+        po = ParametersOut(cell_line: e.cell_line,
+                          passage: e.passage,
+                          media: e.media,
+                          dish_type: e.dish_type,
+                          coating: e.coating,
+                          coating_level: e.coating_level,
+                          stage_pos_x: stage_pos_x,
+                          stage_pos_y: stage_pos_y,
+                          experiment_id : exp_id)
+        params_out = ParamsOut(channels: channels, experiment_parameters: po, system_parameters: experiment.system_parameters)
+        
+        params_json = %* params_out
 
-  try:
-    let
-      experiment = loadExperiment(root_dir / yaml_path)
-      channels = load_channels(root_dir / channels_path, experiment)
-      (stage_pos_x, stage_pos_y) = load_stage_pos(root_dir / stage_path)
-      exp_id = parseInt(readFile(root_dir / exp_id_path))
-      e = experiment.experiment_parameters
-      po = ParametersOut(cell_line: e.cell_line,
-                         passage: e.passage,
-                         media: e.media,
-                         dish_type: e.dish_type,
-                         coating: e.coating,
-                         coating_level: e.coating_level,
-                         stage_pos_x: stage_pos_x,
-                         stage_pos_y: stage_pos_y,
-                         experiment_id : exp_id)
-      params_out = ParamsOut(channels: channels, experiment_parameters: po, system_parameters: experiment.system_parameters)
 
-      params_json = %* params_out
+      var client = newHttpClient()
+      var data  = newMultipartData()
+      let img = readFile(root_dir / img_path)
+      data["image"] = img
+      data["params"] = $params_json
+      info("Loaded image and params.")
 
+      let response = client.postContent(address, multipart=data).parseJson
+      info("Got response from server.")
+      write_positions(root_dir / output_path, response["centroid_x"].getElems, response["centroid_y"].getElems)
+      info("Wrote coordinates to position txt.")
+      write_sync_status(root_dir / sync_path, "2")
+      info("Wrote 2 (proceed) to sync.")
+      
+    except IOError:
+      # Write 3 to file for stop
+      error(getCurrentExceptionMsg())
+      write_sync_status(root_dir / sync_path, "3")
+      stderr.writeLine(getCurrentExceptionMsg())
+      return 1
 
-    var client = newHttpClient()
-    var data  = newMultipartData()
-    let img = readFile(root_dir / img_path)
-    data["image"] = img
-    data["params"] = $params_json
-
-    let response = client.postContent(address, multipart=data).parseJson
-
-    write_positions(root_dir / output_path, response["centroid_x"].getElems, response["centroid_y"].getElems)
-    #write 2 to sync for continue
-    write_sync_status(root_dir / sync_path, "2")
-  except IOError:
-    # Write 3 to file for stop
-    write_sync_status(root_dir / sync_path, "3")
-    stderr.writeLine(getCurrentExceptionMsg())
-    return 1
+    except OSError:
+      # Write 3 to file for stop
+      error(getCurrentExceptionMsg())
+      write_sync_status(root_dir / sync_path, "3")
+      stderr.writeLine(getCurrentExceptionMsg())
+      return 1
 
 
 dispatch(tst, help = {"address": "Server address", "img_path": "Path to the image to be analysed"})
