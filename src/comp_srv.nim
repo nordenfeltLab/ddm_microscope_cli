@@ -1,5 +1,4 @@
-import sugar
-import strutils, tables, sequtils, strformat
+import strutils, tables, sequtils, strformat, options
 import httpClient, streams, os
 import logging
 import json
@@ -70,6 +69,15 @@ proc load_channels(channels_path : string, experiment : Experiment) : seq[Indexe
           let ic = IndexedChannel(name: c.name, staining:c.staining, definition:c.definition, fluorophore:c.fluorophore, index:count)
           result.add(ic)
 
+proc loadLatestImage(img_path : string): TaintedString =
+  var latest = none(string)
+  for fname in walkFiles(img_path / "*"):
+    if latest.isNone or fileNewer(fname, get(latest)):
+      latest = some(fname)
+
+  if latest.isSome:
+    return readFile(get(latest))
+  return readFile(img_path)
 
 proc load_stage_pos(stage_path : string) : (float, float) =
     let raw_txt = readFile(stage_path)
@@ -147,7 +155,7 @@ proc fetch(address = "http://localhost:4443", exp_id_path = "exp_id.txt",
     #write_positions(root_dir / output_path, response["centroid_x"].getElems, response["centroid_y"].getElems)
 
 
-proc send(address = "http://localhost:4443", img_path = "color.tif",
+proc send(address = "http://localhost:4443", img_path = "images",
          yaml_path = "experiment_params.yml", channels_path = "channels.txt",
          stage_path = "stage_pos.txt", exp_id_path = "exp_id.txt",
          output_path = "output_file.txt", sync_path = "sync.txt",
@@ -177,7 +185,7 @@ proc send(address = "http://localhost:4443", img_path = "color.tif",
 
       var client = newHttpClient()
       var data  = newMultipartData()
-      let img = readFile(root_dir / img_path)
+      let img = loadLatestImage(root_dir / img_path)
       data["image"] = img
       data["params"] = $params_json
       info("Loaded image and params.")
