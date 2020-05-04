@@ -1,3 +1,4 @@
+import sugar
 import strutils, tables, sequtils, strformat
 import httpClient, streams, os
 import logging
@@ -107,26 +108,58 @@ proc init_logger(logging_path : string) =
     except IOError:
       var logger = newFileLogger(fmtStr = logging_format)
       addHandler(logger)
-      error(getCurrentExceptionMsg()) 
+      error(getCurrentExceptionMsg())
 
-proc tst(address = "http://localhost:4443", img_path = "color.tif",
+
+template errorHandling(root_dir : string, logging_path : string, sync_path: string, body: untyped) =
+  init_logger(root_dir / logging_path)
+  try:
+    body
+
+  except IOError:
+    # Write 3 to file for stop
+    error(getCurrentExceptionMsg())
+    write_sync_status(root_dir / sync_path, "3")
+    stderr.writeLine(getCurrentExceptionMsg())
+    return 1
+
+  except OSError:
+    # Write 3 to file for stop
+    error(getCurrentExceptionMsg())
+    write_sync_status(root_dir / sync_path, "3")
+    stderr.writeLine(getCurrentExceptionMsg())
+    return 1
+  
+
+
+proc fetch(address = "http://localhost:4443", exp_id_path = "exp_id.txt",
+          sync_path = "sync.txt", output_path = "output_file.txt",
+          logging_path = "log.txt", root_dir = getCurrentDir()): int = 
+
+  errorHandling(root_dir, logging_path, sync_path):
+    echo address & "/get_objects"
+    var client = newHttpClient()
+    
+    let response = client.getContent(address & "/get_objects").parseJson
+    echo response
+    
+    #fix this line 
+    #write_positions(root_dir / output_path, response["centroid_x"].getElems, response["centroid_y"].getElems)
+
+
+proc send(address = "http://localhost:4443", img_path = "color.tif",
          yaml_path = "experiment_params.yml", channels_path = "channels.txt",
          stage_path = "stage_pos.txt", exp_id_path = "exp_id.txt",
          output_path = "output_file.txt", sync_path = "sync.txt",
          logging_path = "log.txt", root_dir = getCurrentDir()) : int =
   
-    init_logger(root_dir / logging_path)
-    try:
+    errorHandling(root_dir, logging_path, sync_path):
       let
-        experiment = loadExperiment(root_dir / yaml_path)
+        experiment = loadExperiment(root_dir / yaml_path) #info("Loaded experiment parameters.")
+        channels = load_channels(root_dir / channels_path, experiment) #info("Loaded channels.")
+        (stage_pos_x, stage_pos_y) = load_stage_pos(root_dir / stage_path) #info("Loaded stage positions.")
         
-        #info("Loaded experiment parameters.")
-        channels = load_channels(root_dir / channels_path, experiment)
-        #info("Loaded channels.")
-        (stage_pos_x, stage_pos_y) = load_stage_pos(root_dir / stage_path)
-        #info("Loaded stage positions.")
-        exp_id = parseInt(readFile(root_dir / exp_id_path))
-        #info("Loaded experiment id.")
+        exp_id = parseInt(readFile(root_dir / exp_id_path)) #info("Loaded experiment id.")
         e = experiment.experiment_parameters
         po = ParametersOut(cell_line: e.cell_line,
                           passage: e.passage,
@@ -151,24 +184,11 @@ proc tst(address = "http://localhost:4443", img_path = "color.tif",
 
       let response = client.postContent(address, multipart=data).parseJson
       info("Got response from server.")
-      write_positions(root_dir / output_path, response["centroid_x"].getElems, response["centroid_y"].getElems)
+    
       info("Wrote coordinates to position txt.")
       write_sync_status(root_dir / sync_path, "2")
       info("Wrote 2 (proceed) to sync.")
-      
-    except IOError:
-      # Write 3 to file for stop
-      error(getCurrentExceptionMsg())
-      write_sync_status(root_dir / sync_path, "3")
-      stderr.writeLine(getCurrentExceptionMsg())
-      return 1
-
-    except OSError:
-      # Write 3 to file for stop
-      error(getCurrentExceptionMsg())
-      write_sync_status(root_dir / sync_path, "3")
-      stderr.writeLine(getCurrentExceptionMsg())
-      return 1
 
 
-dispatch(tst, help = {"address": "Server address", "img_path": "Path to the image to be analysed"})
+
+dispatchMulti([send, help = {"address": "Server address", "img_path": "Path to the image to be analysed"}], [fetch])
