@@ -95,13 +95,13 @@ proc load_stage_pos(stage_path : string) : (float, float) =
     return (tmpData.x, tmpData.y)
 
 
-proc write_positions(output_path : string, pos_x : openArray[JsonNode], pos_y : openArray[JsonNode]) =
+proc write_positions(output_path : string, pos_x : openArray[JsonNode], pos_y : openArray[JsonNode], stage_x : openArray[JsonNode], stage_y : openArray[JsonNode]) =
     let f = open(output_path, fmWrite)
     defer: close(f)
-    for pos in zip(pos_x, pos_y):
-        let lines = [fmt"x={pos.a}", fmt"y={pos.b}"]
-        for line in lines:
-            f.writeLine(line)
+    for i in low(pos_x)..high(pos_x):
+      let lines = [fmt"x={pos_x[i]}", fmt"y={pos_y[i]}", fmt"stage_x={stage_x[i]}", fmt"stage_y={stage_y[i]}"]
+      for line in lines:
+        f.writeLine(line)
 
 proc write_sync_status(sync_path : string, status : string) = 
     writefile(sync_path, status)
@@ -152,7 +152,14 @@ proc fetch(address = "http://localhost:4443", exp_id_path = "exp_id.txt",
     echo response
     
     #fix this line 
-    #write_positions(root_dir / output_path, response["centroid_x"].getElems, response["centroid_y"].getElems)
+    write_positions(root_dir / output_path, 
+                    response["centroid_x"].getElems,
+                    response["centroid_y"].getElems,
+                    response["stage_pos_x"].getElems,
+                    response["stage_pos_y"].getElems)
+    info("Wrote coordinates to position txt.")
+    write_sync_status(root_dir / sync_path, "2")
+    info("Wrote 2 (proceed) to sync.")
 
 
 proc send(address = "http://localhost:4443", img_path = "images",
@@ -192,8 +199,6 @@ proc send(address = "http://localhost:4443", img_path = "images",
 
       let response = client.postContent(address, multipart=data).parseJson
       info("Got response from server.")
-    
-      info("Wrote coordinates to position txt.")
       write_sync_status(root_dir / sync_path, "2")
       info("Wrote 2 (proceed) to sync.")
 
