@@ -141,7 +141,7 @@ proc init_logger(logging_path : string) =
     except IOError:
       var logger = newFileLogger(fmtStr = logging_format)
       addHandler(logger)
-      error(getCurrentExceptionMsg())
+      #error(getCurrentExceptionMsg())
 
 
 template errorHandling*(root_dir : string, logging_path : string, sync_path: string, body: untyped) =
@@ -151,14 +151,14 @@ template errorHandling*(root_dir : string, logging_path : string, sync_path: str
 
   except IOError:
     # Write 3 to file for stop
-    error(getCurrentExceptionMsg())
+    #error(getCurrentExceptionMsg())
     write_sync_status(root_dir / sync_path, "3")
     stderr.writeLine(getCurrentExceptionMsg())
     return 1
 
   except OSError:
     # Write 3 to file for stop
-    error(getCurrentExceptionMsg())
+    #error(getCurrentExceptionMsg())
     write_sync_status(root_dir / sync_path, "3")
     stderr.writeLine(getCurrentExceptionMsg())
     return 1
