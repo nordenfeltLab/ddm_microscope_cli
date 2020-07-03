@@ -29,6 +29,8 @@ jobs:
          echo "::add-path::C:\Users\runneradmin\.nimble\bin"
     - name: Build
       run: nimble -y build
+    - name: Build dll
+      run: nimble dll
     - name: Dir
       run: dir
     - name: Create Release

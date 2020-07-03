@@ -22,3 +22,9 @@ task cross, "Cross-compile":
   --d:mingw
   --cpu:amd64
   setCommand "c", "src/comp_srv"
+
+task dll, "Dynamically linked library":
+  --app:lib
+  --noMain
+  --header
+  setCommand "c", "src/srvcom"
