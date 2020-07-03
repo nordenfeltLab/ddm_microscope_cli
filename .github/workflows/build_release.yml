@@ -54,7 +54,7 @@ jobs:
         asset_name: comp_srv.exe
         asset_content_type: application/vnd.microsoft.portable-executable
     - name: Upload DLL Release Asset
-      id: upload-release-asset 
+      id: upload-dll-release-asset 
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
