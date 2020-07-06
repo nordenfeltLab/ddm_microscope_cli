@@ -224,7 +224,7 @@ proc callSendLight(address : string, root_dir : string, stage_pos_x : float, sta
     params_json = loadParams(root_dir = root_dir, stg_pos = some((stage_pos_x, stage_pos_y)))
     response = sendImageParams(address, img, params_json).to(ServerResponse)
   response.status
-proc callSend(address : cstring, root_dir : cstring, stage_pos_x : float, stage_pos_y : float) : cint {.exportc, dynlib.} =
+proc callSend(address : WideCString, root_dir : WideCString, stage_pos_x : float, stage_pos_y : float) : cint {.exportc, dynlib.} =
   cint(callSendLight($address, $root_dir, stage_pos_x, stage_pos_y))
 proc test_myself(i : WideCString) :cint {.exportc, dynlib.} = 
     cint(len($i))
