@@ -217,7 +217,7 @@ proc sendImageParams*(address : string, img : TaintedString , params_json : Json
       client.postContent(address, multipart=data).parseJson
 
 # NIS-macro
-proc callSendLight(address : string, root_dir : string, stage_pos_x : float, stage_pos_y : float) : int =
+proc callSendHelper(address : string, root_dir : string, stage_pos_x : float, stage_pos_y : float) : int =
   let
     img_path = "images"
     img = loadLatestImage(root_dir / img_path)
@@ -225,6 +225,6 @@ proc callSendLight(address : string, root_dir : string, stage_pos_x : float, sta
     response = sendImageParams(address, img, params_json).to(ServerResponse)
   response.status
 proc callSend(address : WideCString, root_dir : WideCString, stage_pos_x : float, stage_pos_y : float) : cint {.exportc, dynlib.} =
-  cint(callSendLight($address, $root_dir, stage_pos_x, stage_pos_y))
+  cint(callSendHelper($address, $root_dir, stage_pos_x, stage_pos_y))
 proc test_myself(i : WideCString) :cint {.exportc, dynlib.} = 
     cint(len($i))
