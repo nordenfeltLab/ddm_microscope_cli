@@ -25,6 +25,7 @@ task cross, "Cross-compile":
 
 task dll, "Dynamically linked library":
   --app:lib
+  --d:release
   --noMain
   --header
   --d:useNimRtl
