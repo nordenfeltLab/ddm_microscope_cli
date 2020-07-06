@@ -33,5 +33,5 @@ task dll, "Dynamically linked library":
 task rtl, "Run Time Library":
   --d:release
   --d:createNimRtl
-  --app:lib src/srvcom.nim
+  --app:lib
   setCommand "c", "src/nimrtl"
