@@ -227,4 +227,4 @@ proc callSendLight(address : string, root_dir : string, stage_pos_x : float, sta
 proc callSend(address : cstring, root_dir : cstring, stage_pos_x : float, stage_pos_y : float) : cint {.exportc, dynlib.} =
   cint(callSendLight($address, $root_dir, stage_pos_x, stage_pos_y))
 proc test_myself(i : cstring) :cint {.exportc, dynlib.} = 
-    cint(len($i))
+    cint(i[0])
