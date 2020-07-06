@@ -231,4 +231,7 @@ proc test_myself(i : WideCString) : WideCString {.exportc, dynlib.} =
     #let f = open("C:\\", fmWrite)
     #defer: close(f)
     #f.writeLine($i)
-    newWideCString(getCurrentDir())
+    let
+        d = getCurrentDir()
+        p = newWideCString(d)
+    copyMem(cast[pointer](p), cast[pointer](i), len(d)*2)
