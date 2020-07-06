@@ -217,10 +217,12 @@ proc sendImageParams*(address : string, img : TaintedString , params_json : Json
       client.postContent(address, multipart=data).parseJson
 
 # NIS-macro
-proc callSend(address : string, root_dir : string, stage_pos_x : float, stage_pos_y : float) : int {.exportc, dynlib.} =
+proc callSend(address : cstring, root_dir : cstring, stage_pos_x : float, stage_pos_y : float) : int {.exportc, dynlib.} =
   let
     img_path = "images"
     img = loadLatestImage(root_dir / img_path)
     params_json = loadParams(root_dir = root_dir, stg_pos = some((stage_pos_x, stage_pos_y)))
     response = sendImageParams(address, img, params_json).to(ServerResponse)
   response.status
+proc test_myself(i : cint) = 
+  i + 5
