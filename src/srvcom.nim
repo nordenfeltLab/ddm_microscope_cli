@@ -1,4 +1,4 @@
-import strutils, tables, sequtils, strformat, options
+import strutils, tables, strformat, options
 import httpClient, streams, os, system
 import logging
 import json
@@ -218,6 +218,7 @@ proc sendImageParams*(address : string, img : TaintedString , params_json : Json
 
 # NIS-macro
 proc callSendHelper(address : string, root_dir : string, stage_pos_x : float, stage_pos_y : float) : int =
+  init_logger(root_dir / "log.txt")
   let
     img_path = "images"
     img = loadLatestImage(root_dir / img_path)
