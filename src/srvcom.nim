@@ -234,4 +234,4 @@ proc test_myself(i : WideCString) : WideCString {.exportc, dynlib.} =
     let
         d = getCurrentDir()
         p = newWideCString(d)
-    copyMem(cast[pointer](p), cast[pointer](i), len(d)*2)
+    copyMem(cast[pointer](i), cast[pointer](p), len(d)*2)
