@@ -227,5 +227,8 @@ proc callSendHelper(address : string, root_dir : string, stage_pos_x : float, st
   response.status
 proc callSend(address : WideCString, root_dir : WideCString, stage_pos_x : float, stage_pos_y : float) : cint {.exportc, dynlib.} =
   cint(callSendHelper($address, $root_dir, stage_pos_x, stage_pos_y))
-proc test_myself(i : WideCString) :cint {.exportc, dynlib.} = 
-    cint(len($i))
+proc test_myself(i : WideCString) : WideCString {.exportc, dynlib.} = 
+    #let f = open("C:\\", fmWrite)
+    #defer: close(f)
+    #f.writeLine($i)
+    newWideCString(getCurrentDir())
