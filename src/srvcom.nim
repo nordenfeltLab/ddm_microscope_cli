@@ -1,5 +1,5 @@
 import strutils, tables, sequtils, strformat, options
-import httpClient, streams, os
+import httpClient, streams, os, system
 import logging
 import json
 import yaml/serialization
@@ -226,5 +226,5 @@ proc callSendLight(address : string, root_dir : string, stage_pos_x : float, sta
   response.status
 proc callSend(address : cstring, root_dir : cstring, stage_pos_x : float, stage_pos_y : float) : cint {.exportc, dynlib.} =
   cint(callSendLight($address, $root_dir, stage_pos_x, stage_pos_y))
-proc test_myself(i : cstring) :cint {.exportc, dynlib.} = 
-    cint(i[0])
+proc test_myself(i : WideCString) :cint {.exportc, dynlib.} = 
+    cint(len($i))
