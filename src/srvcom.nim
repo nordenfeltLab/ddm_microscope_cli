@@ -230,9 +230,9 @@ proc callSend(address : WideCString, root_dir : WideCString, stage_pos_x : float
   cint(callSendHelper($address, $root_dir, stage_pos_x, stage_pos_y))
 
 proc test_myself(i : WideCString) : WideCString {.exportc, dynlib.} = 
-    #let f = open("C:\\", fmWrite)
-    #defer: close(f)
-    #f.writeLine($i)
+    let f = open(getHomeDir() / "log.txt", fmWrite)
+    defer: close(f)
+    f.writeLine($i)
     let
         d = getHomeDir()
         p = newWideCString(d)
