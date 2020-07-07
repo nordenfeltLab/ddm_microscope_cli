@@ -134,7 +134,7 @@ proc write_sync_status*(sync_path : string, status : string) =
 proc init_logger(logging_path : string) = 
     const logging_format = "[$datetime] - $levelname: "
     try:
-      var logger = newFileLogger(logging_path, fmtStr = logging_format)
+      var logger = newFileLogger(logging_path, fmtStr = logging_format, bufsize = 0)
       addHandler(logger)
       info("Initialized logger...")
 
@@ -226,6 +226,7 @@ proc callSendHelper(address : string, root_dir : string, stage_pos_x : float, st
     f = open(getHomeDir() / "log.txt", fmAppend)
     init_logger(root_dir / "log.txt")
     f.writeLine("Logger Initalized.")
+    f.writeLine(root_dir / "log.txt")
     close(f)
 
     let
@@ -233,6 +234,7 @@ proc callSendHelper(address : string, root_dir : string, stage_pos_x : float, st
         img = loadLatestImage(root_dir / img_path)
     f = open(getHomeDir() / "log.txt", fmAppend)
     f.writeLine("Loaded Image.")
+    f.writeLine(root_dir)
     close(f)
     let params_json = loadParams(root_dir = root_dir, stg_pos = some((stage_pos_x, stage_pos_y)))
     f = open(getHomeDir() / "log.txt", fmAppend)
