@@ -225,6 +225,7 @@ proc callSendHelper(address : string, root_dir : string, stage_pos_x : float, st
     close(f)
     f = open(getHomeDir() / "log.txt", fmAppend)
     init_logger(root_dir / "log.txt")
+    info("testing the logger now, hope it works.")
     f.writeLine("Logger Initalized.")
     f.writeLine(root_dir / "log.txt")
     close(f)
