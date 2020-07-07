@@ -234,7 +234,7 @@ proc callSendHelper(address : string, root_dir : string, f : File, stage_pos_x :
     f.writeLine("Sent Image.")
     response.status
 
-proc callSend(address : WideCString, root_dir : WideCString, stage_pos_x : float, stage_pos_y : float) : cint {.exportc, dynlib.} =
+proc callSend(address : WideCString, root_dir : WideCString, stage_pos_x : cdouble, stage_pos_y : cdouble) : cint {.exportc, dynlib.} =
   let f = open(getHomeDir() / "log.txt", fmWrite)
   
   f.writeLine("Calling callSendHelper...")
