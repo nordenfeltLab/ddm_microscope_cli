@@ -234,11 +234,11 @@ proc callSendHelper(address : string, root_dir : string, f : File, stage_pos_x :
     f.writeLine("Sent Image.")
     response.status
 
-proc callSend(address : WideCString, root_dir : WideCString, stage_pos_x : cdouble, stage_pos_y : cdouble) : cint {.exportc, dynlib.} =
+proc callSend(address : WideCString, root_dir : WideCString) : cint {.exportc, dynlib.} =
   let f = open(getHomeDir() / "log.txt", fmWrite)
   
   f.writeLine("Calling callSendHelper...")
-  result = cint(callSendHelper($address, $root_dir, f, stage_pos_x, stage_pos_y))
+  result = cint(callSendHelper($address, $root_dir, f, 1.7, 4.2))
   close(f)
 
 proc test_myself(i : WideCString) : WideCString {.exportc, dynlib.} = 
