@@ -194,18 +194,25 @@ proc loadParams*(root_dir : string, yaml_path = "experiment_params.yml", channel
                output_path = "output_file.txt", sync_path = "sync.txt",
                logging_path = "log.txt",  
                stg_pos = none((float, float)) ) : JsonNode =
-  let
-    experiment = loadExperiment(root_dir / yaml_path)
-    channels = load_channels(root_dir / channels_path, experiment)
-    exp_id = parseInt(readFile(root_dir / exp_id_path))
     
-    (stage_pos_x, stage_pos_y) = if stg_pos.isSome:
+    info("Loading Experiment...")
+    let experiment = loadExperiment(root_dir / yaml_path)
+    info("Done loading Experiment")
+    info("Loading Channels...")
+    let channels = load_channels(root_dir / channels_path, experiment)
+    info("Done loading channels")
+    info("Loading Experiment_id")
+    let exp_id = parseInt(readFile(root_dir / exp_id_path))
+    info("Done loading Experiment_id...")
+
+    
+    let (stage_pos_x, stage_pos_y) = if stg_pos.isSome:
       stg_pos.get
     else:
       load_stage_pos(root_dir / stage_path)
-    params_out = initParamsOut(experiment, channels, exp_id, stage_pos_x, stage_pos_y)
+    let params_out = initParamsOut(experiment, channels, exp_id, stage_pos_x, stage_pos_y)
     
-  %* params_out
+    %* params_out
 
 proc sendImageParams*(address : string, img : TaintedString , params_json : JsonNode) : JsonNode =
       var client = newHttpClient()
@@ -218,39 +225,22 @@ proc sendImageParams*(address : string, img : TaintedString , params_json : Json
 
 # NIS-macro
 proc callSendHelper(address : string, root_dir : string, stage_pos_x : float, stage_pos_y : float) : int =
-    var f = open(getHomeDir() / "log.txt", fmAppend)
-    f.writeLine("callSendHelper called")
-    f.writeLine(fmt"callSendHelper({address}, {root_dir}, {stage_pos_x}, {stage_pos_y})")
-    f.writeLine("Initializing logger...")
-    close(f)
-    f = open(getHomeDir() / "log.txt", fmAppend)
     init_logger(root_dir / "log.txt")
-    info("testing the logger now, hope it works.")
-    f.writeLine("Logger Initalized.")
-    f.writeLine(root_dir / "log.txt")
-    close(f)
+    info("callSendHelper called")
+    info(fmt"callSendHelper({address}, {root_dir}, {stage_pos_x}, {stage_pos_y})")
+    
+    let img = loadLatestImage(root_dir / "images")
+    info("Loaded Image.")
 
-    let
-        img_path = "images"
-        img = loadLatestImage(root_dir / img_path)
-    f = open(getHomeDir() / "log.txt", fmAppend)
-    f.writeLine("Loaded Image.")
-    f.writeLine(root_dir)
-    close(f)
     let params_json = loadParams(root_dir = root_dir, stg_pos = some((stage_pos_x, stage_pos_y)))
-    f = open(getHomeDir() / "log.txt", fmAppend)
-    f.writeLine("Params Loaded.")
-    close(f)
+    info("Params Loaded.")
+
     let response = sendImageParams(address, img, params_json).to(ServerResponse)
-    f = open(getHomeDir() / "log.txt", fmAppend)
-    f.writeLine("Sent Image.")
-    close(f)
+    info("Sent Image.")
+
     response.status
 
 proc callSend(address : WideCString, root_dir : WideCString) : cint {.exportc, dynlib.} =
-  let f = open(getHomeDir() / "log.txt", fmAppend)
-  f.writeLine("Calling callSendHelper...")
-  close(f)
   result = cint(callSendHelper($address, $root_dir, 1.7, 4.2))
 
 proc test_myself(i : WideCString) : WideCString {.exportc, dynlib.} = 
