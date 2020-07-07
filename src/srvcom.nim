@@ -201,7 +201,7 @@ proc loadParams*(root_dir : string, yaml_path = "experiment_params.yml", channel
     info("Loading Channels...")
     let channels = load_channels(root_dir / channels_path, experiment)
     info("Done loading channels")
-    info("Loading Experiment_id")
+    info("Loading Experiment_id...")
     let exp_id = parseInt(readFile(root_dir / exp_id_path))
     info("Done loading Experiment_id...")
 
@@ -231,8 +231,9 @@ proc callSendHelper(address : string, root_dir : string, stage_pos_x : float, st
     
     let img = loadLatestImage(root_dir / "images")
     info("Loaded Image.")
-
-    let params_json = loadParams(root_dir = root_dir, stg_pos = some((stage_pos_x, stage_pos_y)))
+    let stage_positions = some((stage_pos_x, stage_pos_y))
+    info("stage_position created")
+    let params_json = loadParams(root_dir = root_dir, stg_pos = stage_positions)
     info("Params Loaded.")
 
     let response = sendImageParams(address, img, params_json).to(ServerResponse)
