@@ -26,7 +26,7 @@ task cross, "Cross-compile":
 task dll, "Dynamically linked library":
   --app:lib
   --threads:off
-  #--gc:arc
+  --gc:boehm
   --d:release
   --noMain
   --header
@@ -36,7 +36,7 @@ task dll, "Dynamically linked library":
 task rtl, "Run Time Library":
   --app:lib
   --threads:off
-  #--gc:arc
+  --gc:boehm
   --d:release
   --d:createNimRtl
   setCommand "c", "src/nimrtl"
