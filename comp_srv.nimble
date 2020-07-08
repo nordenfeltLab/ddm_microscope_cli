@@ -25,14 +25,18 @@ task cross, "Cross-compile":
 
 task dll, "Dynamically linked library":
   --app:lib
-  --d:debug
+  --threads:off
+  #--gc:arc
+  --d:release
   --noMain
   --header
   --d:useNimRtl
   setCommand "c", "src/srvcom"
 
 task rtl, "Run Time Library":
+  --app:lib
+  --threads:off
+  #--gc:arc
   --d:release
   --d:createNimRtl
-  --app:lib
   setCommand "c", "src/nimrtl"

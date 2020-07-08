@@ -6,5 +6,5 @@ test_parameters
 *.dylib
 *.log
 *.txt
-*.yml
+experiment_params.yml
 images/
