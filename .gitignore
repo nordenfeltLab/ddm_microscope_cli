@@ -3,3 +3,8 @@
 comp_srv
 test_parameters
 .DS_Store
+*.dylib
+*.log
+*.txt
+*.yml
+images/
