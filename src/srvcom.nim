@@ -108,20 +108,10 @@ proc loadLatestImage*(img_path : string): TaintedString =
   return readFile(img_path)
 
 proc load_stage_pos(stage_path : string) : (float, float) =
-    let raw_txt = readFile(stage_path)
-    let str_len = len(raw_txt) div 2
-    var txt = newString(str_len)
-
-    var j = 0
-    for i in 0..<txt.len:
-        let c = raw_txt[2*i]
-        if ord(c) in {26..126, 13}:
-            txt[j] = c
-            inc(j)
-
-    let tmpData = to(parseJson(txt), StagePos)
-    return (tmpData.x, tmpData.y)
-
+    let 
+        stage_positions = parseJson(readFile(stage_path))
+        pos_out = to(stage_positions, StagePos)
+    return (pos_out.x, pos_out.y)
 
 proc write_positions(output_path : string, pos_x : openArray[JsonNode], pos_y : openArray[JsonNode], stage_x : openArray[JsonNode], stage_y : openArray[JsonNode]) =
     let f = open(output_path, fmWrite)
@@ -190,8 +180,6 @@ proc fetch*(address = "http://localhost:4443", exp_id_path = "exp_id.txt",
     info("Wrote 2 (proceed) to sync.")
 
 
-
-
 proc loadParams*(root_dir : string, yaml_path = "experiment_params.yml", channels_path = "channels.txt",
                stage_path = "stage_pos.txt", exp_id_path = "exp_id.txt",
                output_path = "output_file.txt", sync_path = "sync.txt",
@@ -251,8 +239,6 @@ proc callSend(address : WideCString, root_dir : WideCString) : cint {.exportc, d
   result = cint(callSendHelper($address, $root_dir, 1.7, 4.2))
 
 proc test_myself(i : WideCString) : WideCString {.exportc, dynlib.} = 
-    
-    
     let
         d = getHomeDir()
         p = newWideCString(d)
