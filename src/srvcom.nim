@@ -82,8 +82,11 @@ proc initParamsOut(experiment : Experiment, channels: seq[IndexedChannel],
 
 proc load_experiment(yaml_path : string) : Experiment =
     var s = openFileStream(yaml_path)
+    info("openFileStream")
     defer: close(s)
+    
     load(s, result)
+    info("loaded")
 
 proc load_channels(channels_path : string, experiment : Experiment) : seq[IndexedChannel] =
     var count = 0
@@ -195,7 +198,7 @@ proc loadParams*(root_dir : string, yaml_path = "experiment_params.yml", channel
                logging_path = "log.txt",  
                stg_pos = none((float, float)) ) : JsonNode =
     
-    info("Loading Experiment...")
+    info("Loading Experiment from " & (root_dir / yaml_path))
     let experiment = loadExperiment(root_dir / yaml_path)
     info("Done loading Experiment")
     info("Loading Channels...")
