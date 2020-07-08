@@ -245,9 +245,7 @@ proc callSend(address : WideCString, root_dir : WideCString) : cint {.exportc, d
   result = cint(callSendHelper($address, $root_dir, 1.7, 4.2))
 
 proc test_myself(i : WideCString) : WideCString {.exportc, dynlib.} = 
-    
-    
-    let
-        d = getHomeDir()
-        p = newWideCString(d)
-    copyMem(cast[pointer](i), cast[pointer](p), len(d)*2)
+  let
+    d = getHomeDir()
+    p = newWideCString(d)
+  copyMem(cast[pointer](i), cast[pointer](p), len(d)*2)
