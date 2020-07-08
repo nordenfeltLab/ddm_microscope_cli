@@ -197,7 +197,7 @@ proc loadParams*(root_dir : string, yaml_path = "experiment_params.yml", channel
                output_path = "output_file.txt", sync_path = "sync.txt",
                logging_path = "log.txt",  
                stg_pos = none((float, float)) ) : JsonNode =
-    
+    info("called loadParams")
     info("Loading Experiment from " & (root_dir / yaml_path))
     let experiment = loadExperiment(root_dir / yaml_path)
     info("Done loading Experiment")
