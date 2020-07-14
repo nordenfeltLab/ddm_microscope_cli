@@ -18,8 +18,7 @@ proc send(address = "http://localhost:4443", img_path = "images",
         img = loadLatestImage(root_dir / img_path)
         params_json = loadParams(
           root_dir, yaml_path, channels_path, stage_path, exp_id_path,
-          output_path, sync_path, logging_path, 
-          )
+          output_path, sync_path, logging_path)
 
       discard sendImageParams(address, img, params_json)
       info("Got response from server.")
@@ -27,4 +26,7 @@ proc send(address = "http://localhost:4443", img_path = "images",
       info("Wrote 2 (proceed) to sync.")
 
 
-dispatchMulti([send, help = {"address": "Server address", "img_path": "Path to the image to be analysed"}], [fetch])
+dispatchMulti([send, help = {"address": "Server address", 
+                            "img_path": "Path to the image to be analysed"}], 
+              [fetch, help = {"distribution": "What groups should be fetched",
+                              "n": "How many hits should be fetched"}])

@@ -1,5 +1,5 @@
 import strutils, tables, strformat, options
-import httpClient, streams, os, system
+import httpClient, streams, os, system, uri
 import logging
 import json
 import yaml/serialization
@@ -160,13 +160,14 @@ template errorHandling*(root_dir : string, logging_path : string, sync_path: str
 
 proc fetch*(address = "http://localhost:4443", exp_id_path = "exp_id.txt",
           sync_path = "sync.txt", output_path = "output_file.txt",
-          logging_path = "log.txt", root_dir = getCurrentDir()): int = 
+          logging_path = "log.txt", root_dir = getCurrentDir(),
+          distribution = 0, n = 10): int = 
 
   errorHandling(root_dir, logging_path, sync_path):
     echo address & "/get_objects"
     var client = newHttpClient()
     
-    let response = client.getContent(address & "/get_objects").parseJson
+    let response = client.getContent(address & "/get_objects?" & encodeQuery({"distribtion": $distribution, "n": $n})).parseJson 
     echo response
     
     #fix this line 
