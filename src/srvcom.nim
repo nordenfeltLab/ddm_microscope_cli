@@ -230,8 +230,8 @@ proc loadParams*(root_dir : string, yaml_path = "experiment_params.yml", channel
 proc sendImageParams*(address : string, img : TaintedString , params_json : JsonNode) : JsonNode =
       var client = newHttpClient()
       var data  = newMultipartData()
-      data["image"] = img
-      data["params"] = $params_json
+      data["image"] = ("img.tif","image/tif",img)
+      data["params"] = ("params.json", "application/json", $params_json)
       
       info("Loaded image and params.")
 
