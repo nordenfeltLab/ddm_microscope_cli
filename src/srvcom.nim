@@ -244,6 +244,7 @@ proc initExperiment*(root_dir : string, analysis : string, address = "http://loc
   data["analysis"] = analysis
 
   let response = client.postContent(address & "/initiate_experiment", multipart=data)
+  info("Got experiment_id from server:" / response)
   write_exp_id(root_dir / exp_id_path, response)
   
   

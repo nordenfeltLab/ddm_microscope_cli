@@ -27,10 +27,9 @@ proc send(address = "http://localhost:4443", img_path = "images",
 
 #
 #proc initiate_experiment( analysis : string, address = "http://localhost:4443",exp_id_path = "exp_id.txt") : int = 
-#    initExperiment(analysis, address, exp_id_path)
+#    initExperiment(anal address, exp_id_path)
 
 dispatchMulti([send, help = {"address": "Server address", 
-                            "img_path": "Path to the image to be analysed",
-                            "analysis_flag": "what analysis should be ran"}],
+                            "img_path": "Path to the image to be analysed"}],
               [initExperiment, help = {}],
                       [fetch, help = {}])
