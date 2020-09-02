@@ -55,8 +55,8 @@ type
     experiment_parameters : ParametersOut
     system_parameters : SysParameters
 
-  ServerResponse = object
-    status : int
+#  ServerResponse = object
+#    status : int
 
 
 proc initParametersOut(e : Parameters, stage_pos_x : float, 
@@ -237,14 +237,14 @@ proc sendImageParams*(address : string, img : TaintedString , params_json : Json
 
       client.postContent(address, multipart=data).parseJson
 
-proc initExperiment*(analysis : string, address = "http://localhost:4443", exp_id_path = "exp_id.txt") : int = 
+proc initExperiment*(root_dir : string, analysis : string, address = "http://localhost:4443", exp_id_path = "exp_id.txt") : int = 
   
   var client = newHttpClient()
   var data = newMultipartData()
   data["analysis"] = analysis
 
   let response = client.postContent(address & "/initiate_experiment", multipart=data)
-  write_exp_id(exp_id_path, response)
+  write_exp_id(root_dir / exp_id_path, response)
   
   
 
