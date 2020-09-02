@@ -121,6 +121,16 @@ proc write_positions(output_path : string, pos_x : openArray[JsonNode], pos_y : 
       for line in lines:
         f.writeLine(line)
 
+
+proc write_exp_id(exp_id_path = "exp_id.txt", exp_id : string) = 
+    writeFile(exp_id_path, exp_id)
+
+proc read_exp_id*(exp_id_path = "exp_id.txt") :int = 
+    let a = readFile(exp_id_path)
+    let exp_id = parseInt(a.string)
+    return exp_id
+
+
 proc write_sync_status*(sync_path : string, status : string) = 
     writefile(sync_path, status)
 
@@ -160,25 +170,32 @@ template errorHandling*(root_dir : string, logging_path : string, sync_path: str
 
 proc fetch*(address = "http://localhost:4443", exp_id_path = "exp_id.txt",
           sync_path = "sync.txt", output_path = "output_file.txt",
-          logging_path = "log.txt", root_dir = getCurrentDir(),
+          logging_path = "log.txt", root_dir = getCurrentDir(), 
           distribution = 0, n = 10): int = 
 
   errorHandling(root_dir, logging_path, sync_path):
     echo address & "/get_objects"
-    var client = newHttpClient()
-    
-    let response = client.getContent(address & "/get_objects?" & encodeQuery({"distribtion": $distribution, "n": $n})).parseJson 
+    let client = newHttpClient()
+    let exp_id = read_exp_id()
+    let response = client.getContent(address & "/get_objects?" & encodeQuery({"distribution": $distribution, "n": $n, "experiment_id": $exp_id})).parseJson 
     echo response
+    let sync_status = if response["response"].getBool:
+      write_positions(root_dir / output_path, 
+        response["centroid_x"].getElems,
+        response["centroid_y"].getElems,
+        response["stage_pos_x"].getElems,
+        response["stage_pos_y"].getElems)
+      info("Wrote coordinates to position txt.")
+      info("Wrote 1 (proceed to DDA) to sync.")
+      "1"
+    else:
+      info("Wrote 0 (continue DIA) to sync.")
+      "0"
     
-    #fix this line 
-    write_positions(root_dir / output_path, 
-                    response["centroid_x"].getElems,
-                    response["centroid_y"].getElems,
-                    response["stage_pos_x"].getElems,
-                    response["stage_pos_y"].getElems)
-    info("Wrote coordinates to position txt.")
-    write_sync_status(root_dir / sync_path, "2")
-    info("Wrote 2 (proceed) to sync.")
+    
+    write_sync_status(root_dir / sync_path, sync_status)
+    
+    
 
 
 proc loadParams*(root_dir : string, yaml_path = "experiment_params.yml", channels_path = "channels.txt",
@@ -197,7 +214,8 @@ proc loadParams*(root_dir : string, yaml_path = "experiment_params.yml", channel
     let channels = load_channels(root_dir / channels_path, experiment)
     info("Done loading channels")
     info("Loading Experiment_id...")
-    let exp_id = parseInt(readFile(root_dir / exp_id_path))
+    let a = readFile(root_dir / exp_id_path)
+    let exp_id = parseInt(a.string)
     info("Done loading Experiment_id...")
 
     
@@ -214,33 +232,46 @@ proc sendImageParams*(address : string, img : TaintedString , params_json : Json
       var data  = newMultipartData()
       data["image"] = img
       data["params"] = $params_json
+      
       info("Loaded image and params.")
 
       client.postContent(address, multipart=data).parseJson
 
-# NIS-macro
-proc callSendHelper(address : string, root_dir : string, stage_pos_x : float, stage_pos_y : float) : int =
-    init_logger(root_dir / "log.txt")
-    info("callSendHelper called")
-    info(fmt"callSendHelper({address}, {root_dir}, {stage_pos_x}, {stage_pos_y})")
+proc initExperiment*(analysis : string, address = "http://localhost:4443", exp_id_path = "exp_id.txt") : int = 
+  
+  var client = newHttpClient()
+  var data = newMultipartData()
+  data["analysis"] = analysis
+
+  let response = client.postContent(address & "/initiate_experiment", multipart=data)
+  write_exp_id(exp_id_path, response)
+  
+  
+
+#proc test_myself(i : WideCString) : WideCString {.exportc, dynlib.} = 
+#    let
+#        d = getHomeDir()
+#        p = newWideCString(d)
+#    copyMem(cast[pointer](i), cast[pointer](p), len(d)*2)
+
+
+## NIS-macro
+#proc callSendHelper(address : string, root_dir : string, stage_pos_x : float, stage_pos_y : float) : int =
+#    init_logger(root_dir / "log.txt")
+#    info("callSendHelper called")
+#    info(fmt"callSendHelper({address}, {root_dir}, {stage_pos_x}, {stage_pos_y})")
     
-    let img = loadLatestImage(root_dir / "images")
-    info("Loaded Image.")
-    let stage_positions = some((stage_pos_x, stage_pos_y))
-    info("stage_position created")
-    let params_json = loadParams(root_dir = root_dir, stg_pos = stage_positions)
-    info("Params Loaded.")
+#    let img = loadLatestImage(root_dir / "images")
+#    info("Loaded Image.")
+#    let stage_positions = some((stage_pos_x, stage_pos_y))
+#    info("stage_position created")
+#    let params_json = loadParams(root_dir = root_dir, stg_pos = stage_positions)
+#    info("Params Loaded.")
 
-    let response = sendImageParams(address, img, params_json).to(ServerResponse)
-    info("Sent Image.")
+#    let response = sendImageParams(address, img, params_json).to(ServerResponse)
+#    info("Sent Image.")
 
-    response.status
+#    response.status
 
-proc callSend(address : WideCString, root_dir : WideCString) : cint {.exportc, dynlib.} =
-  result = cint(callSendHelper($address, $root_dir, 1.7, 4.2))
-
-proc test_myself(i : WideCString) : WideCString {.exportc, dynlib.} = 
-    let
-        d = getHomeDir()
-        p = newWideCString(d)
-    copyMem(cast[pointer](i), cast[pointer](p), len(d)*2)
+#proc callSend(address : WideCString, root_dir : WideCString) : cint {.exportc, dynlib.} =
+#  result = cint(callSendHelper($address, $root_dir, 1.7, 4.2))
