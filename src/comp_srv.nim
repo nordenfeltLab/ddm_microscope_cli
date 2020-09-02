@@ -24,8 +24,7 @@ proc send(address = "http://localhost:4443", img_path = "images",
 
       discard sendImageParams(address, img, params_json)
       info("Got response from server.")
-      write_sync_status(root_dir / sync_path, "2")
-      info("Wrote 2 (proceed) to sync.")
+      
 
 #
 #proc initiate_experiment( analysis : string, address = "http://localhost:4443",exp_id_path = "exp_id.txt") : int = 
