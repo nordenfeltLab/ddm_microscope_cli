@@ -176,7 +176,7 @@ proc fetch*(address = "http://localhost:4443", exp_id_path = "exp_id.txt",
   errorHandling(root_dir, logging_path, sync_path):
     echo address & "/get_objects"
     let client = newHttpClient()
-    let exp_id = read_exp_id()
+    let exp_id = read_exp_id(root_dir / exp_id_path)
     let response = client.getContent(address & "/get_objects?" & encodeQuery({"distribution": $distribution, "n": $n, "experiment_id": $exp_id})).parseJson 
     echo response
     let sync_status = if response["response"].getBool:
