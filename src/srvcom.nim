@@ -30,6 +30,7 @@ type
     coating : string
     coating_level : int
 
+
   SysParameters = object
     microscope : string
     magnification : string
@@ -45,6 +46,7 @@ type
     stage_pos_y : float
     experiment_id : int
     frame : int
+    well_label : int
 
   Experiment = object
     channels : seq[Channel]
@@ -62,7 +64,7 @@ type
 
 proc initParametersOut(e : Parameters, stage_pos_x : float, 
                       stage_pos_y : float, exp_id : int,
-                      frame : int) : ParametersOut =
+                      frame : int, well_label : int) : ParametersOut =
 
   ParametersOut(cell_line: e.cell_line,
                 passage: e.passage,
@@ -73,14 +75,16 @@ proc initParametersOut(e : Parameters, stage_pos_x : float,
                 stage_pos_x: stage_pos_x,
                 stage_pos_y: stage_pos_y,
                 experiment_id : exp_id,
-                frame : frame)
+                frame : frame,
+                well_label : well_label)
 
 proc initParamsOut(experiment : Experiment, channels: seq[IndexedChannel],
                   exp_id : int, stage_pos_x : float, 
-                  stage_pos_y : float, frame : int) : ParamsOut =
+                  stage_pos_y : float, frame : int,
+                  well_label : int) : ParamsOut =
   let
     e = experiment.experiment_parameters
-    po = initParametersOut(e, stage_pos_x, stage_pos_y, exp_id, frame)
+    po = initParametersOut(e, stage_pos_x, stage_pos_y, exp_id, frame, well_label)
   ParamsOut(channels: channels, experiment_parameters: po, system_parameters: experiment.system_parameters)
 
 proc load_experiment(yaml_path : string) : Experiment =
@@ -116,10 +120,11 @@ proc load_stage_pos(stage_path : string) : (float, float) =
       pos_out = to(stage_positions, StagePos)
     return (pos_out.x, pos_out.y)
 
-proc load_frame(frame_path : string) : int = 
+proc load_int_from_txt(path : string) : int = 
     let
-      frame = readFile(frame_path)
-    return parseInt(frame.string)
+      i = readFile(path)
+    return parseInt(i.string)
+
 
 proc write_positions(output_path : string, pos_x : openArray[JsonNode], pos_y : openArray[JsonNode], stage_x : openArray[JsonNode], stage_y : openArray[JsonNode]) =
     let f = open(output_path, fmWrite)
@@ -129,15 +134,9 @@ proc write_positions(output_path : string, pos_x : openArray[JsonNode], pos_y : 
       for line in lines:
         f.writeLine(line)
 
-
 proc write_exp_id(exp_id_path = "exp_id.txt", exp_id : string) = 
     writeFile(exp_id_path, exp_id)
 
-proc read_exp_id*(exp_id_path = "exp_id.txt") :int = 
-    let 
-      a = readFile(exp_id_path)
-      exp_id = parseInt(a.string)
-    return exp_id
 
 
 proc write_sync_status*(sync_path : string, status : string) = 
@@ -174,8 +173,6 @@ template errorHandling*(root_dir : string, logging_path : string, sync_path: str
     write_sync_status(root_dir / sync_path, "3")
     stderr.writeLine(getCurrentExceptionMsg())
     return 1
-  
-
 
 proc fetch*(address = "http://localhost:4443", exp_id_path = "exp_id.txt",
           sync_path = "sync.txt", output_path = "output_file.txt",
@@ -185,7 +182,7 @@ proc fetch*(address = "http://localhost:4443", exp_id_path = "exp_id.txt",
   errorHandling(root_dir, logging_path, sync_path):
     echo address & "/get_objects"
     let client = newHttpClient()
-    let exp_id = read_exp_id(root_dir / exp_id_path)
+    let exp_id = load_int_from_txt(root_dir / exp_id_path)
     let response = client.getContent(address & "/get_objects?" & encodeQuery({"distribution": $distribution, "n": $n, "experiment_id": $exp_id})).parseJson 
     echo response
     let sync_status = if response["response"].getBool:
@@ -211,7 +208,7 @@ proc loadParams*(root_dir : string, yaml_path = "experiment_params.yml", channel
                stage_path = "stage_pos.txt", exp_id_path = "exp_id.txt",
                output_path = "output_file.txt", sync_path = "sync.txt",
                logging_path = "log.txt", frame_path = "frame.txt",  
-               stg_pos = none((float, float)) ) : JsonNode =
+               well_label_path = "well_label.txt", stg_pos = none((float, float)) ) : JsonNode =
     info(yaml_path)
     info(root_dir)
 
@@ -222,11 +219,12 @@ proc loadParams*(root_dir : string, yaml_path = "experiment_params.yml", channel
     let channels = load_channels(root_dir / channels_path, experiment)
     info("Done loading channels")
     info("Loading frame...")
-    let frame = load_frame(root_dir / frame_path)
+    let frame = load_int_from_txt(root_dir / frame_path)
     info("Done loading frame.")
+    let well_label = load_int_from_txt(root_dir / well_label_path)
     info("Loading Experiment_id...")
-    let a = readFile(root_dir / exp_id_path)
-    let exp_id = parseInt(a.string)
+    let exp_id = load_int_from_txt(root_dir / exp_id_path)
+    
     info("Done loading Experiment_id")
 
     
@@ -234,7 +232,7 @@ proc loadParams*(root_dir : string, yaml_path = "experiment_params.yml", channel
       stg_pos.get
     else:
       load_stage_pos(root_dir / stage_path)
-    let params_out = initParamsOut(experiment, channels, exp_id, stage_pos_x, stage_pos_y, frame)
+    let params_out = initParamsOut(experiment, channels, exp_id, stage_pos_x, stage_pos_y, frame, well_label)
     
     %* params_out
 
