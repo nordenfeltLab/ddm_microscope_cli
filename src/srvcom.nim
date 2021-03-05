@@ -236,7 +236,7 @@ proc loadParams*(root_dir : string, yaml_path = "experiment_params.yml", channel
     
     %* params_out
 
-proc sendImageParams*(address : string, img : TaintedString , params_json : JsonNode) : JsonNode =
+proc sendImageParams*(address : string, img : TaintedString , params_json : JsonNode, root_dir : string, sync_path : string) : JsonNode =
       var client = newHttpClient()
       var data  = newMultipartData()
       data["image"] = ("img.tif","image/tif",img)
@@ -244,7 +244,10 @@ proc sendImageParams*(address : string, img : TaintedString , params_json : Json
       
       info("Loaded image and params.")
 
-      client.postContent(address, multipart=data).parseJson
+      let response = client.postContent(address, multipart=data).parseJson
+      let sync_status = respose["response"].getBool
+      write_sync_status(root_dir / sync_path, sync_status)
+
 
 proc initExperiment*(root_dir : string, analysis : string, address = "http://localhost:4443", exp_id_path = "exp_id.txt") : int = 
   

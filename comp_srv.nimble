@@ -12,7 +12,7 @@ bin           = @["comp_srv"]
 # Dependencies
 
 requires "nim >= 1.0.0"
-requires "NimYAML"
+requires "https://github.com/flyx/NimYAML#devel"
 requires "cligen"
 
 # Tasks 

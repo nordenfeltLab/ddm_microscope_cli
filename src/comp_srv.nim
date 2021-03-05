@@ -22,7 +22,7 @@ proc send(address = "http://localhost:4443", img_path = "images",
           output_path, sync_path, logging_path, frame_path, well_label_path
           )
 
-      discard sendImageParams(address, img, params_json)
+      discard sendImageParams(address, img, params_json, root_dir, sync_path)
       info("Got response from server.")
       
 
