@@ -26,7 +26,7 @@ jobs:
          $output = ".\choosenim.exe"
          (New-Object System.Net.WebClient).DownloadFile($winrel.browser_download_url, $output)
          .\choosenim.exe -y stable --firstInstall
-         echo "::add-path::C:\Users\runneradmin\.nimble\bin"
+         echo "C:\Users\runneradmin\.nimble\bin" >> $GITHUB_PATH
     - name: Build
       run: nimble -y build
     - name: Build dll
