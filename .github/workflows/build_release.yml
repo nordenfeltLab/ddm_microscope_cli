@@ -26,7 +26,7 @@ jobs:
          $output = ".\choosenim.exe"
          (New-Object System.Net.WebClient).DownloadFile($winrel.browser_download_url, $output)
          .\choosenim.exe -y stable --firstInstall
-         bitsadmin.exe /rawreturn /transfer "cURL-certicates" /priority FOREGROUND https://curl.se/ca/cacert.pem $pwd\NimBinaries\nim-stable\bin\cacert.pem
+         bitsadmin.exe /rawreturn /transfer "cURL-certicates" /priority FOREGROUND https://curl.se/ca/cacert.pem C:\Users\runneradmin\.nimble\bin\cacert.pem
          echo "C:\Users\runneradmin\.nimble\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
     - name: Build
       run: nimble -y build
