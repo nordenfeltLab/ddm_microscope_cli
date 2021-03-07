@@ -245,7 +245,10 @@ proc sendImageParams*(address : string, img : TaintedString , params_json : Json
       info("Loaded image and params.")
 
       let response = client.postContent(address, multipart=data).parseJson
-      let sync_status = respose["response"].getBool
+      let sync_status = if response["response"].getBool:
+          "1"
+        else:
+          "0"
       write_sync_status(root_dir / sync_path, sync_status)
 
 
