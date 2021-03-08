@@ -221,7 +221,9 @@ proc loadParams*(root_dir : string, yaml_path = "experiment_params.yml", channel
     info("Loading frame...")
     let frame = load_int_from_txt(root_dir / frame_path)
     info("Done loading frame.")
+    info("Loading well label.")
     let well_label = load_int_from_txt(root_dir / well_label_path)
+    info("Done loading well label")
     info("Loading Experiment_id...")
     let exp_id = load_int_from_txt(root_dir / exp_id_path)
     
