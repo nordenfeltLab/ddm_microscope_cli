@@ -1,10 +1,12 @@
 .cache
 *.exe
 comp_srv
-test_parameters
 .DS_Store
 *.dylib
 *.log
 *.txt
-experiment_params.yml
-images/
+query.prisma
+*.swp
+*.swo
+test_data/
+/src/test*
