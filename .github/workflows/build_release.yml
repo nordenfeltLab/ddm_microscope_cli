@@ -30,10 +30,6 @@ jobs:
          echo "C:\Users\runneradmin\.nimble\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
     - name: Build
       run: nimble -y build
-    - name: Build dll
-      run: nimble dll
-    - name: Build rtl
-      run: nimble rtl
     - name: Dir
       run: dir
     - name: Create Release
@@ -55,24 +51,4 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
         asset_path: ./comp_srv.exe
         asset_name: comp_srv.exe
-        asset_content_type: application/vnd.microsoft.portable-executable
-    - name: Upload DLL Release Asset
-      id: upload-dll-release-asset 
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-        asset_path: ./src/srvcom.dll
-        asset_name: srvcom.dll
-        asset_content_type: application/vnd.microsoft.portable-executable
-    - name: Upload Rtl Release Asset
-      id: upload-rtl-release-asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-        asset_path: ./src/nimrtl.dll
-        asset_name: nimrtl.dll
         asset_content_type: application/vnd.microsoft.portable-executable

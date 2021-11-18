@@ -10,3 +10,4 @@ query.prisma
 *.swo
 test_data/
 /src/test*
+
