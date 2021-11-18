@@ -23,15 +23,12 @@ proc fetch*(address      = "http://localhost:4445",
             sync_path    = "sync.txt",
             response_path = "response.txt",
             logging_path = "log.txt",
-            experiment_id = 0,
-            analysis : string,
             root_dir     = getCurrentDir(),
             queryString  : string
           ): int =
 
   errorHandling(root_dir, logging_path, sync_path):
     let client = newHttpClient()
-    let address = fmt"http://localhost:{port}/api/v1/experiments/{experiment_id}/
     let query = address & "?query=" & queryString.replace(" ", by="%20")
     info(query)
     let response = client.getContent($query).parseJson
