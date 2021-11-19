@@ -19,23 +19,31 @@ import cligen
 #      for line in lines:
 #        f.writeLine(line)
 #
-proc fetch*(address      = "http://localhost:4445",
+
+proc queryDDM*(address      = "http://localhost:4445",
             sync_path    = "sync.txt",
             response_path = "response.txt",
             logging_path = "log.txt",
             root_dir     = getCurrentDir(),
-            queryString  : string
+            queryString  = "",
+            queryPath = ""
           ): int =
-
+  
   errorHandling(root_dir, logging_path, sync_path):
+    let query = if isEmptyOrWhitespace(queryPath):
+      queryString
+    else:
+      readFile(root_dir / queryPath)
+
     let client = newHttpClient()
-    let query = address & "?query=" & queryString.replace(" ", by="%20")
+    let queryAddress = address & "?query=" & query.replace(" ", by="%20")
     info(query)
-    let response = client.getContent($query).parseJson
+    let response = client.getContent($queryAddress).parseJson
     info(fmt"Wrote response to: {response_path} ")
 
     writeFile(root_dir / response_path, $response)
     writeFile(root_dir / sync_path, "1")
+    
 
 proc loadLatestImage*(img_path : string): string =
   var latest = none(string)

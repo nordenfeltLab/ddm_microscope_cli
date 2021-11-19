@@ -26,12 +26,13 @@ if isMainModule:
                                 "img_path"      : "Filename of the image to be sent.",
                                 "root_dir"      : "Path to root directory.",
                                 "sync_path"     : "Filename for sync-status."}],
-                [fetch, help = {"address"       : "Server address.",
+             [queryDDM, help = {"address"       : "Server address.",
                                 "sync_path"     : "Filename for sync-status.",
                                 "response_path" : "Filename of response-dump.",
                                 "logging_path"  : "Filename for logging.",
                                 "root_dir"      : "Path to root directory.",
-                                "queryString"   : "Query."
+                                "queryString"   : "Query as argument",
+                                "queryPath"     : "Query as txt file (overrides queryString)"
                         }]
             )
   
