@@ -38,7 +38,7 @@ proc queryDDM*(address      = "http://localhost:4445",
 
     let client = newHttpClient()
     let queryAddress = address & "?query=" & query.replace(" ", by="%20")
-    info(query)
+    info(queryAddress)
     let response = client.getContent($queryAddress).parseJson
     info(fmt"Wrote response to: {response_path} ")
 
