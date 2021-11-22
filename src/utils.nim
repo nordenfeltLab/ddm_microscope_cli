@@ -30,10 +30,11 @@ proc queryDDM*(address      = "http://localhost:4445",
           ): int =
   
   errorHandling(root_dir, logging_path, sync_path):
-    let query = if isEmptyOrWhitespace(queryPath):
+    var query = if isEmptyOrWhitespace(queryPath):
       queryString
     else:
       readFile(root_dir / queryPath)
+    query.stripLineEnd
 
     let client = newHttpClient()
     let queryAddress = address & "?query=" & query.replace(" ", by="%20")
