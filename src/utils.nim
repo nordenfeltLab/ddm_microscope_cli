@@ -41,6 +41,7 @@ proc queryDDM*(address      = "http://localhost:4445",
     info(queryAddress)
     let response = client.getContent($queryAddress).parseJson
     info(fmt"Wrote response to: {response_path} ")
+    info(fmt"Response: {response}")
 
     writeFile(root_dir / response_path, $response)
     writeFile(root_dir / sync_path, "1")
