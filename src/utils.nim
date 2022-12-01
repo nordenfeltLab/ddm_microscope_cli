@@ -1,24 +1,23 @@
 import httpClient, os, system, uri
 import strutils, strformat, options, json
+import sequtils, algorithm
 import logging
 import error_handler
 import cligen
+
 #import streams, tables
 
 
-# -- UTILS
-#proc writePositions(output_path : string,
-#                     stage_x : openArray[JsonNode],
-#                     stage_y : openArray[JsonNode]
-#                     ) =
-#
-#    let f = open(output_path, fmWrite)
-#    defer: close(f)
-#    for i in low(stage_x)..high(stage_x):
-#      let lines = [fmt"stage_x={stage_x[i]}", fmt"stage_y={stage_y[i]}"]
-#      for line in lines:
-#        f.writeLine(line)
-#
+proc getFileTimepoint(filename: string) :int =
+  parseInt(filename[^7..^5])
+           
+proc getImages*(dir_path: string, fil_ext = "nd2") : seq[string] =
+
+  #var files: seq[string] = @[]
+  let files = toSeq( walkFiles(dir_path / "*." & fil_ext))
+  let filtfiles = files.filterIt(it[^7..^5].allIt(it in {'0'..'9'}))
+    
+  filtfiles.sortedByIt(getFileTimepoint(it))
 
 proc queryDDM*(address      = "http://localhost:4445",
             sync_path    = "sync.txt",
