@@ -47,7 +47,7 @@ proc demoSend(address     = "http://localhost/4443",
 
 
 if isMainModule:
-  dispatchMulti([send, help  = {"address"       : "Server address, e.g 'http://localhost:4444'.",
+  dispatchMulti([send, help  = {"address"       : "Server address, e.g 'http://localhost:4443'.",
                                 "img_path"      : "Filename of the image to be sent.",
                                 "root_dir"      : "Path to root directory.",
                                 "sync_path"     : "Filename for sync-status."}],
@@ -59,7 +59,7 @@ if isMainModule:
                                 "queryString"   : "Query as argument",
                                 "queryPath"     : "Query as txt file (overrides queryString)"
                         }],
-              [demoSend, help = {"address"      : "Server address, e.g 'http://localhost:4444'.",
+              [demoSend, help = {"address"      : "Server address, e.g 'http://localhost:4443'.",
                                  "dir_path"     : "Directory where test-files are stored.",
                                  "root_dir"     : "Path to root directory.",
                                  "sync_path"    : "Filename for sync-status."
