@@ -47,7 +47,7 @@ jobs:
         asset_path: ./bin/win-main.exe
         asset_name: win-main.exe
         asset_content_type: application/vnd.microsoft.portable-executable
-    mac_build:
+  mac_build:
     runs-on: macos-12
     steps:
     - name: Install nim
