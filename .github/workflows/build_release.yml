@@ -66,7 +66,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ build.steps.create_release.outputs.upload_url }}
+        upload_url: ${{ needs.build.steps.create_release.outputs.upload_url }}
         asset_path: ./bin/mac-x86_64-main
         asset_name: mac-x86_64-main
     - name: Upload OSX Arm64 Build
@@ -75,7 +75,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ build.steps.create_release.outputs.upload_url }}
+        upload_url: ${{ needs.build.steps.create_release.outputs.upload_url }}
         asset_path: ./bin/mac-arm64-main
         asset_name: mac-arm64-main
     - name: Upload OSX M1 Build
@@ -84,6 +84,6 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ build.steps.create_release.outputs.upload_url }}
+        upload_url: ${{ needs.buildsteps.create_release.outputs.upload_url }}
         asset_path: ./bin/mac-m1-main
         asset_name: mac-m1-main
