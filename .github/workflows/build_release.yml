@@ -17,10 +17,8 @@ jobs:
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
-    - name: Set up GCC mingw
-      run: sudo apt-get install gcc-mingw-w64
-    - name: Set up Clang 
-      run: sudo apt-get install clang
+    - name: Set up C
+      run: sudo apt-get install gcc-mingw-w64 clang gcc gcc-multilib
     - name: Install nim
       run: |
          curl https://nim-lang.org/choosenim/init.sh -sSf | sh -s -- -y
