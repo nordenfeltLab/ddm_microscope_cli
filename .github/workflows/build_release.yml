@@ -47,30 +47,43 @@ jobs:
         asset_path: ./bin/win-main.exe
         asset_name: win-main.exe
         asset_content_type: application/vnd.microsoft.portable-executable
+
+  mac_build:
+    runs-on: macos-12
+    steps:
+    - name: Install nim
+      run: |
+         curl https://nim-lang.org/choosenim/init.sh -sSf | sh -s -- -y
+         ~/.nimble/bin/choosenim -y stable --firstInstall
+    - name: Build
+      run: PATH=~/.nimble/bin:$PATH nimble cross
+    - name: Dir
+      run: dir
+ 
     - name: Upload OSX x86_64 Build
       id: upload-osx-x86_64-release-asset 
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./bin/mac-x86_64-main.exe
-        asset_name: mac-x86_64-main.exe
+        upload_url: ${{ build.steps.create_release.outputs.upload_url }}
+        asset_path: ./bin/mac-x86_64-main
+        asset_name: mac-x86_64-main
     - name: Upload OSX Arm64 Build
       id: upload-osx-arm64-release-asset 
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./bin/mac-arm64-main.exe
-        asset_name: mac-arm64-main.exe
+        upload_url: ${{ build.steps.create_release.outputs.upload_url }}
+        asset_path: ./bin/mac-arm64-main
+        asset_name: mac-arm64-main
     - name: Upload OSX M1 Build
       id: upload-osx-m1-release-asset 
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./bin/mac-m1-main.exe
-        asset_name: mac-m1-main.exe
+        upload_url: ${{ build.steps.create_release.outputs.upload_url }}
+        asset_path: ./bin/mac-m1-main
+        asset_name: mac-m1-main
