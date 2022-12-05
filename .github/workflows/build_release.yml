@@ -37,7 +37,7 @@ jobs:
         draft: false
         prerelease: false
     - name: Upload Windows Build
-      id: upload-release-asset 
+      id: upload-win-release-asset 
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -47,7 +47,7 @@ jobs:
         asset_name: win-main.exe
         asset_content_type: application/vnd.microsoft.portable-executable
     - name: Upload OSX x86_64 Build
-      id: upload-release-asset 
+      id: upload-osx-x86_64--release-asset 
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -56,7 +56,7 @@ jobs:
         asset_path: ./bin/mac-x86_64-main.exe
         asset_name: mac-x86_64-main.exe
     - name: Upload OSX Arm64 Build
-      id: upload-release-asset 
+      id: upload-osx-arm64-release-asset 
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -65,7 +65,7 @@ jobs:
         asset_path: ./bin/mac-arm64-main.exe
         asset_name: mac-arm64-main.exe
     - name: Upload OSX M1 Build
-      id: upload-release-asset 
+      id: upload-osx-m1-release-asset 
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
