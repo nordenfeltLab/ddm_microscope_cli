@@ -11,7 +11,7 @@ jobs:
   # This workflow contains a single job called "build"
   build:
     # The type of runner that the job will run on
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -20,16 +20,10 @@ jobs:
       
     - name: Install nim
       run: |
-         $relurl = "https://api.github.com/repos/dom96/choosenim/releases/latest"
-         $release = Invoke-RestMethod -Method 'Get' -Uri $relurl
-         $winrel = $release.assets | where name -LIKE "*_windows_amd64.exe"
-         $output = ".\choosenim.exe"
-         (New-Object System.Net.WebClient).DownloadFile($winrel.browser_download_url, $output)
-         .\choosenim.exe -y stable --firstInstall
-         bitsadmin.exe /rawreturn /transfer "cURL-certicates" /priority FOREGROUND https://curl.se/ca/cacert.pem C:\Users\runneradmin\.nimble\bin\cacert.pem
-         echo "C:\Users\runneradmin\.nimble\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+         curl https://nim-lang.org/choosenim/init.sh -sSf | sh
+         choosenim -y stable --firstInstall
     - name: Build
-      run: nimble -y build
+      run: nimble cross
     - name: Dir
       run: dir
     - name: Create Release
@@ -42,13 +36,40 @@ jobs:
         release_name: Release ${{ github.ref }}
         draft: false
         prerelease: false
-    - name: Upload Release Asset
+    - name: Upload Windows Build
       id: upload-release-asset 
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-        asset_path: ./main.exe
-        asset_name: main.exe
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./bin/win-main.exe
+        asset_name: win-main.exe
         asset_content_type: application/vnd.microsoft.portable-executable
+    - name: Upload OSX x86_64 Build
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./bin/mac-x86_64-main.exe
+        asset_name: mac-x86_64-main.exe
+    - name: Upload OSX Arm64 Build
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./bin/mac-arm64-main.exe
+        asset_name: mac-arm64-main.exe
+    - name: Upload OSX M1 Build
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./bin/mac-m1-main.exe
+        asset_name: mac-m1-main.exe
