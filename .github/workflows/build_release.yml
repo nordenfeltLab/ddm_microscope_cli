@@ -21,7 +21,7 @@ jobs:
     - name: Install nim
       run: |
          curl https://nim-lang.org/choosenim/init.sh -sSf | sh -s -- -y
-         ~/.nimble/bin/choosenim -y stable --firstInstall -s -- -y
+         ~/.nimble/bin/choosenim -y stable --firstInstall
     - name: Build
       run: ~/.nimble/bin/nimble cross
     - name: Dir
