@@ -20,7 +20,7 @@ jobs:
       
     - name: Install nim
       run: |
-         curl https://nim-lang.org/choosenim/init.sh -sSf | sh
+         curl https://nim-lang.org/choosenim/init.sh -sSf | sh -s -- -y
          choosenim -y stable --firstInstall
     - name: Build
       run: nimble cross
