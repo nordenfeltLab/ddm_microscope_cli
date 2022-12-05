@@ -56,7 +56,7 @@ jobs:
          curl https://nim-lang.org/choosenim/init.sh -sSf | sh -s -- -y
          ~/.nimble/bin/choosenim -y stable --firstInstall
     - name: Build
-      run: nimble cross
+      run: PATH=~/.nimble/bin:$PATH nimble cross
     - name: Dir
       run: dir
     - name: Upload OSX x86_64 Build
