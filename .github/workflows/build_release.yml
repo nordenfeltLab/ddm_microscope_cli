@@ -47,14 +47,14 @@ jobs:
         asset_path: ./bin/win-main.exe
         asset_name: win-main.exe
         asset_content_type: application/vnd.microsoft.portable-executable
-
-  mac_build:
+    mac_build:
     runs-on: macos-12
     steps:
     - name: Install nim
       run: |
          curl https://nim-lang.org/choosenim/init.sh -sSf | sh -s -- -y
          ~/.nimble/bin/choosenim -y stable --firstInstall
+
     - name: Build
       run: nimble cross
     - name: Dir
