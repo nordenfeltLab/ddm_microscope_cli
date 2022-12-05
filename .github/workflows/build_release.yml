@@ -59,7 +59,7 @@ jobs:
     - name: Build
       run: PATH=~/.nimble/bin:$PATH nimble cross
     - name: Dir
-      run: dir
+      run: ls -a
     - name: Upload OSX x86_64 Build
       id: upload-osx-x86_64-release-asset 
       uses: actions/upload-release-asset@v1
