@@ -13,6 +13,8 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
+    - outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -37,22 +39,20 @@ jobs:
         release_name: Release ${{ github.ref }}
         draft: false
         prerelease: false
-    - name: Set upload_url
-      run: |
-        echo "upload_url=${{ steps.create_release.outputs.upload_url }}" >> $GITHUB_ENV
     - name: Upload Windows Build
       id: upload-win-release-asset 
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ env.upload_url }}
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./bin/win-main.exe
         asset_name: win-main.exe
         asset_content_type: application/vnd.microsoft.portable-executable
 
   mac_build:
     runs-on: macos-12
+    needs: build
     steps:
     - uses: actions/checkout@v2
     - name: Install nim
@@ -62,15 +62,14 @@ jobs:
     - name: Build
       run: PATH=~/.nimble/bin:$PATH nimble cross
     - name: Dir
-      run: ls -a 
-        | echo ${{ env.upload_url }}
+      run: ls -a
     - name: Upload OSX x86_64 Build
       id: upload-osx-x86_64-release-asset 
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ env.upload_url }}
+        upload_url: ${{ needs.build.steps.create_release.outputs.upload_url }}
         asset_path: ./bin/mac-x86_64-main
         asset_name: mac-x86_64-main
     - name: Upload OSX Arm64 Build
@@ -79,7 +78,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ env.upload_url }}
+        upload_url: ${{ needs.build.steps.create_release.outputs.upload_url }}
         asset_path: ./bin/mac-arm64-main
         asset_name: mac-arm64-main
     - name: Upload OSX M1 Build
@@ -88,6 +87,6 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ env.upload_url }}
+        upload_url: ${{ needs.buildsteps.create_release.outputs.upload_url }}
         asset_path: ./bin/mac-m1-main
         asset_name: mac-m1-main
