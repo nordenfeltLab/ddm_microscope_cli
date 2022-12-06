@@ -74,6 +74,7 @@ jobs:
         upload_url: ${{ needs.build.outputs.upload_url }}
         asset_path: ./bin/mac-x86_64-main
         asset_name: mac-x86_64-main
+        asset_content_type: application/octet-stream
     - name: Upload OSX Arm64 Build
       id: upload-osx-arm64-release-asset 
       uses: actions/upload-release-asset@v1
@@ -83,6 +84,7 @@ jobs:
         upload_url: ${{ needs.build.outputs.upload_url }}
         asset_path: ./bin/mac-arm64-main
         asset_name: mac-arm64-main
+        asset_content_type: application/octet-stream
     - name: Upload OSX M1 Build
       id: upload-osx-m1-release-asset 
       uses: actions/upload-release-asset@v1
@@ -92,3 +94,4 @@ jobs:
         upload_url: ${{ needs.build.outputs.upload_url }}
         asset_path: ./bin/mac-m1-main
         asset_name: mac-m1-main
+        asset_content_type: application/octet-stream
