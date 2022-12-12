@@ -41,7 +41,7 @@ proc demoSend(address     = "http://localhost/4443",
     info("Sending images to server.")
     for img in images:
       info(fmt"Sending image {img}...")
-      discard sendImage(address, img, root_dir, sync_path)
+      discard sendImage(address, img, "", sync_path)
       info(fmt"Sent image {img}.")
     info("Done sending images to server.")
 
