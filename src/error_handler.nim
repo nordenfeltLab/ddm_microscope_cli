@@ -1,5 +1,5 @@
 import logging
-proc init_logger(logging_path : string) =
+proc initLogger(logging_path : string) =
     const logging_format = "[$datetime] - $levelname: "
     try:
       var logger = newFileLogger(logging_path, fmtStr = logging_format, bufsize = 0)
@@ -16,7 +16,7 @@ template errorHandling*(root_dir : string,
                         sync_path: string,
                         body: untyped
                         ) =
-  init_logger(root_dir / logging_path)
+  initLogger(root_dir / logging_path)
   try:
     body
 
