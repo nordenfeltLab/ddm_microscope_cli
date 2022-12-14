@@ -56,21 +56,15 @@ proc loadLatestImage*(img_path : string): string =
     return readFile(get(latest))
   return readFile(img_path)
 
-proc sendImage*(address : string,
-              img_path : string,
-              root_dir : string,
-              sync_path : string,
-              ) : JsonNode =
+proc sendImage*(address : string, img, sync_path : string) : JsonNode =
 
   var client = newHttpClient()
   var data = newMultipartData()
 
-  info("Loading image from: " & root_dir / img_path)
-  let img = loadLatestImage(root_dir / img_path)
   data["image"] = ("img.nd2", "image/nd2", img) #handle multipart for tif/nd2 etc dynamically...
   info("Image loaded...")
-
+  info(fmt"Sending image to {address}")
   let response = client.postContent(address, multipart = data).parseJson
-  writeFile(root_dir / sync_path, response["response"].str)
+  writeFile(sync_path, response["response"].str)
 
 

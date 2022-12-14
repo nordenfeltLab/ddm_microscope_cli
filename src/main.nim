@@ -18,8 +18,10 @@ proc send(address         = "http://localhost:4443",
           ) : int =
   
   errorHandling(root_dir, logging_path, sync_path):
+    info("Loading image from: " & root_dir / img_path)
+    let img = loadLatestImage(root_dir / img_path)
 
-    discard sendImage(address, img_path, root_dir, sync_path)
+    discard sendImage(address, img, root_dir / sync_path)
     info("Got response from server.")
 
 proc demoSend(address     = "http://localhost/4443",
@@ -30,6 +32,7 @@ proc demoSend(address     = "http://localhost/4443",
               ) : int =
 
   errorHandling(root_dir, logging_path, sync_path):
+
     # -- GETTING IMAGES
     let path = root_dir / dir_path
 
@@ -41,7 +44,10 @@ proc demoSend(address     = "http://localhost/4443",
     info("Sending images to server.")
     for img in images:
       info(fmt"Sending image {img}...")
-      discard sendImage(address, img, "", sync_path)
+
+      var img_file = readFile(img)
+      discard sendImage(address, img_file, root_dir / sync_path)
+
       info(fmt"Sent image {img}.")
     info("Done sending images to server.")
 
